@@ -25,7 +25,7 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: yourusername/yourrepositoryname:latest
+        tags: magattee/weather_wrapper2:latest
 
     - name: Logout from Docker Hub
       run: docker logout
