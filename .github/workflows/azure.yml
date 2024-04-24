@@ -50,7 +50,7 @@ jobs:
       with: 
         resource-group: "ADDA84-CTP" 
         dns-name-label: "devops-20230405"
-        image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/20230405:latest
+        image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/weather-wrapper-api:latest
         name: "20230405"
         location: "germanynorth" 
         registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }} 
