@@ -8,8 +8,8 @@ WORKDIR /app
 COPY . /app
 
 # Install any needed packages specified in requirements.txt
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r ./TP2/requirements.txt
+COPY ./TP2/requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Make port 8081 available to the world outside this container
 EXPOSE 8081
