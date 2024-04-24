@@ -25,7 +25,7 @@ jobs:
       uses: docker/build-push-action@v2
       with: 
         context: . 
-        file: ./Dockerfile 
+        file: ./TP2/Dockerfile 
         push: true 
         tags: ${{ secrets.REGISTRY_LOGIN_SERVER }}/20230405
     # - name: Run Hadolint 
