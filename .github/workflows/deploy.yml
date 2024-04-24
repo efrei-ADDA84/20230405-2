@@ -23,7 +23,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: .
-        file: ./Dockerfile
+        file: ./TP2/Dockerfile
         push: true
         tags: magattee/weather_wrapper-api:latest
 
