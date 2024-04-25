@@ -85,19 +85,7 @@ jobs:
 
 
 
-```bash
-$env:OPENWEATHER_API_KEY="5a3638a1fe348edbce720562c4d4c0cc"
 
-```
-
-Puis ecrire run le fichier:
-
-![Capture d'écran 2024-04-24 130522](https://github.com/efrei-ADDA84/20230405-2/assets/154382359/b399badf-c503-446f-a64a-886477b2d11f)
-
-
-on peut ensuite faire un curl ou une recherche sur internet pour tester:
-
-![Capture d'écran 2024-04-24 154421](https://github.com/efrei-ADDA84/20230405-2/assets/154382359/1fd6cf14-aaa3-47b0-81e1-701291e06a6b)
 
 
 ### 3. Difficultés rencontrées
