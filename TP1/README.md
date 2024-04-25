@@ -112,7 +112,7 @@ CMD ["python", "./weather_wrapper2.py"]
 Construisez votre image Docker avec la commande suivante :
 
 ```bash
-docker build -t magattee/weather-wrapper2 .
+docker build -t magattee/weather-app2 .
 ```
 
 ### 5. Test de l'image
