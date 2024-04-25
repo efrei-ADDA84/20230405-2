@@ -75,9 +75,6 @@ Puis ecrire run le fichier:
 ![Capture d'écran 2024-04-24 130522](https://github.com/efrei-ADDA84/20230405-2/assets/154382359/b399badf-c503-446f-a64a-886477b2d11f)
 
 
-
-![image](https://github.com/efrei-ADDA84/20230405-2/assets/154382359/3c351b5a-582d-4a2d-a9cf-d9b212bbc855)
-
 on peut ensuite faire un curl ou une recherche sur internet pour tester:
 
 ![Capture d'écran 2024-04-24 154421](https://github.com/efrei-ADDA84/20230405-2/assets/154382359/1fd6cf14-aaa3-47b0-81e1-701291e06a6b)
@@ -88,21 +85,28 @@ on peut ensuite faire un curl ou une recherche sur internet pour tester:
 Création d'un Dockerfile pour construire votre image Docker :
 
 ```Dockerfile
-# Utiliser une image de base Python officielle.
+# Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
-# Définir le répertoire de travail dans le conteneur
+# Set the working directory in the container
 WORKDIR /app
 
-# Copier le fichier de dépendances et installer les dépendances
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Copier le script Python dans le conteneur
-COPY weather_wrapper2.py .
+# Install any needed packages specified in requirements.txt
+RUN pip install flask
+RUN pip install requests
+RUN pip install python-dotenv
 
-# Commande pour exécuter le script Python
-CMD ["python", "./weather_wrapper2.py"]
+# Make port 8081 available to the world outside this container
+EXPOSE 8081
+
+# Define the Flask application
+ENV FLASK_APP=api.py
+
+# Run app.py when the container launches
+CMD ["flask", "run", "--host=0.0.0.0", "--port=8081"]
 
 ```
 
@@ -111,7 +115,7 @@ CMD ["python", "./weather_wrapper2.py"]
 Construisez votre image Docker avec la commande suivante :
 
 ```bash
-docker build -t magattee/weather-wrapper2 .
+docker build -t magattee/weather-wrapper-api.
 ```
 
 ### 5. Test de l'image
@@ -119,9 +123,10 @@ docker build -t magattee/weather-wrapper2 .
 Testez l'image localement :
 
 ```bash
-docker run -e LATITUDE=40.7128 -e LONGITUDE=-74.0060 -e OPENWEATHER_API_KEY=5a3638a1fe348edbce720562c4d4c0cc weather-app2
+docker run -p 8081:8081 weather-app-api
 ```
-![image](https://github.com/efrei-ADDA84/20230405-2/assets/154382359/61b3bf61-af6b-429b-97c2-0e2e0f22944c)
+![Capture d'écran 2024-04-24 154433](https://github.com/efrei-ADDA84/20230405-2/assets/154382359/f3edb58d-4139-4ea7-8d64-607ce6057cc2)
+
 
 ### 6. Publication sur DockerHub
 
@@ -129,13 +134,79 @@ Connectez-vous à DockerHub et publiez votre image :
 
 ```bash
 docker login
-docker push magattee/weather-wrapper2
+docker push magattee/weather-wrapper-api
 ```
 
-### 7. Mise à jour du dépôt GitHub
+### 7. Créer un workflow pour mettre à jour l'image:
+
+```bash
+name: docker build azure
+
+on: 
+  push: 
+    branches: 
+      - main 
+
+jobs: 
+  build-and-push: 
+    runs-on: ubuntu-latest 
+    steps: 
+    - uses: actions/checkout@v2 
+
+    - name: Set up Docker Buildx  
+      uses: docker/setup-buildx-action@v1
+
+    - name: Log in to Azure Container Registry 
+      uses: docker/login-action@v1
+      with: 
+        registry: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Build and push Docker image to ACR
+      uses: docker/build-push-action@v2
+      with: 
+        context: . 
+        file: ./TP2/Dockerfile 
+        push: true 
+        tags: ${{ secrets.REGISTRY_LOGIN_SERVER }}/weather-wrapper-api:latest
+    # - name: Run Hadolint 
+    #   uses: hadolint/hadolint-action@v1.6.0
+    #   with:
+    #     dockerfile: Dockerfile
+        
+  deploy: 
+    needs: build-and-push 
+    runs-on: ubuntu-latest 
+    steps: 
+    - name: Checkout code 
+      uses: actions/checkout@v2
+
+    - name: 'Login via Azure CLI' 
+      uses: azure/login@v1
+      with: 
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 'Deploy to Azure Container Instance' 
+      uses: azure/aci-deploy@v1
+      with: 
+        resource-group: "ADDA84-CTP" 
+        dns-name-label: "devops-20230405"
+        image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/weather-wrapper-api:latest
+        name: "20230405"
+        location: "germanynorth" 
+        registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }} 
+        registry-username: ${{ secrets.REGISTRY_USERNAME }} 
+        registry-password: ${{ secrets.REGISTRY_PASSWORD }} 
+        secure-environment-variables: API_KEY=${{ secrets.API_KEY }}
+```
+![image](https://github.com/efrei-ADDA84/20230405-2/assets/154382359/8917829e-dba9-4276-8738-8669e27ee3ee)
+
+
+### 8. Mise à jour du dépôt GitHub
 
 Commit depuis vscode
 
 ## Conclusion
 
-Après avoir suivi ces étapes, votre application devrait être fonctionnelle et accessible sur DockerHub. Assurez-vous de vérifier la validité de l'API Key et des coordonnées passées en variables d'environnement.
+Après avoir suivi ces étapes, votre application devrait être fonctionnelle et accessible sur DockerHub. Assurez-vous de vérifier la validité de l'API Key.
