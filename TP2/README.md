@@ -140,65 +140,33 @@ docker push magattee/weather-wrapper-api
 ### 7. Créer un workflow pour mettre à jour l'image:
 
 ```bash
-name: docker build azure
+name: Docker Image CI
 
-on: 
-  push: 
-    branches: 
-      - main 
+on:
+  push:
+    branches: [ main ]
 
-jobs: 
-  build-and-push: 
-    runs-on: ubuntu-latest 
-    steps: 
-    - uses: actions/checkout@v2 
-
-    - name: Set up Docker Buildx  
-      uses: docker/setup-buildx-action@v1
-
-    - name: Log in to Azure Container Registry 
-      uses: docker/login-action@v1
-      with: 
-        registry: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-
-    - name: Build and push Docker image to ACR
-      uses: docker/build-push-action@v2
-      with: 
-        context: . 
-        file: ./TP2/Dockerfile 
-        push: true 
-        tags: ${{ secrets.REGISTRY_LOGIN_SERVER }}/weather-wrapper-api:latest
-    # - name: Run Hadolint 
-    #   uses: hadolint/hadolint-action@v1.6.0
-    #   with:
-    #     dockerfile: Dockerfile
-        
-  deploy: 
-    needs: build-and-push 
-    runs-on: ubuntu-latest 
-    steps: 
-    - name: Checkout code 
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out the repository
       uses: actions/checkout@v2
 
-    - name: 'Login via Azure CLI' 
-      uses: azure/login@v1
-      with: 
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: 'Deploy to Azure Container Instance' 
-      uses: azure/aci-deploy@v1
-      with: 
-        resource-group: "ADDA84-CTP" 
-        dns-name-label: "devops-20230405"
-        image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/weather-wrapper-api:latest
-        name: "20230405"
-        location: "germanynorth" 
-        registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }} 
-        registry-username: ${{ secrets.REGISTRY_USERNAME }} 
-        registry-password: ${{ secrets.REGISTRY_PASSWORD }} 
-        secure-environment-variables: API_KEY=${{ secrets.API_KEY }}
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./TP2/Dockerfile
+        push: true
+        tags: magattee/weather-app-api:latest
+
 ```
 ![image](https://github.com/efrei-ADDA84/20230405-2/assets/154382359/8917829e-dba9-4276-8738-8669e27ee3ee)
 
